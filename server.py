@@ -29,14 +29,14 @@ def rooms():
         if room:
             return "Room %s already exists" % name, 409
 
-        mongo.db.rooms.insert({'_id': name, 'events': [], 'heathchecked_at': None})
+        mongo.db.rooms.insert({'_id': name, 'events': [], 'healthchecked_at': None})
         return "", 201
 
     rooms = mongo.db.rooms.find() or []
     response = []
     for room in rooms:
         empty = False
-        alive = room['heathchecked_at'] is not None and (datetime.now() - room['heathchecked_at'].replace(tzinfo=None)).seconds < ALIVE_INTERVAL
+        alive = room['healthchecked_at'] is not None and (datetime.now() - room['healthchecked_at'].replace(tzinfo=None)).seconds < ALIVE_INTERVAL
 
         response.append({
             'name': room['_id'],
@@ -66,12 +66,12 @@ def register_event(name):
 
 
 @app.route("/healthcheck/<name>")
-def heathcheck(name):
+def healthcheck(name):
     room = mongo.db.rooms.find_one({'_id': name})
     if room is None:
         return "", 404
 
-    room = mongo.db.rooms.find_and_modify({'_id': name}, {'heathchecked_at': datetime.now()})
+    room = mongo.db.rooms.find_and_modify({'_id': name}, {'healthchecked_at': datetime.now()})
     return "", 201
 
 
