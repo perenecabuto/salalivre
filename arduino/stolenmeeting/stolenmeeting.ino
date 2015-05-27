@@ -3,6 +3,8 @@
 int sensor = 2;
 int light = 13;
 
+char * ID = "784144e8-0401-11e5-8164-406c8f05228f";
+
 void setup() {
     pinMode(sensor, INPUT);
     pinMode(light, OUTPUT);
