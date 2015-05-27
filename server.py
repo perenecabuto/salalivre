@@ -10,6 +10,7 @@ mongo = PyMongo(app)
 
 EVENT_TIME_INTERVAL = 30  # seconds
 ALIVE_INTERVAL = 3 * 60 # seconds
+MAX_EVENTS_PER_ROOM = 10
 
 
 @app.route("/")
@@ -35,12 +36,19 @@ def rooms():
     rooms = mongo.db.rooms.find() or []
     response = []
     for room in rooms:
-        empty = False
-        alive = room['healthchecked_at'] is not None and (datetime.now() - room['healthchecked_at'].replace(tzinfo=None)).seconds < ALIVE_INTERVAL
+        in_use = False
+        alive = room.get('healthchecked_at', False) and (datetime.now() - room['healthchecked_at'].replace(tzinfo=None)).seconds < ALIVE_INTERVAL
+
+        events = room.get('events', [])
+        if len(events) > 2:
+            current_interval = (datetime.now() - events[-1].replace(tzinfo=None)).seconds
+            first_interval = (events[-1] - events[-2]).seconds
+            last_interval = (events[-2] - events[-3]).seconds
+            in_use = current_interval <= EVENT_TIME_INTERVAL and first_interval <= EVENT_TIME_INTERVAL and last_interval <= EVENT_TIME_INTERVAL
 
         response.append({
             'name': room['_id'],
-            'empty': empty,
+            'in_use': in_use,
             'alive': alive,
         })
 
@@ -61,7 +69,7 @@ def register_event(name):
 
     events = room.get('events', [])
     events.append(datetime.now())
-    room = mongo.db.rooms.find_and_modify({'_id': name}, {'events': events[-10:]})
+    room = mongo.db.rooms.find_and_modify({'_id': name}, {'events': events[-MAX_EVENTS_PER_ROOM:]})
     return "",  201
 
 

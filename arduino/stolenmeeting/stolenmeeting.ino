@@ -10,7 +10,8 @@ void setup() {
     pinMode(light, OUTPUT);
 }
 
-void loop () {
+
+void loop() {
     digitalWrite(light, LOW);
     delay(1000);
 
