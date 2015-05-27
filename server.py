@@ -37,7 +37,7 @@ def rooms():
     response = []
     for room in rooms:
         in_use = False
-        alive = room.get('healthchecked_at', False) and (datetime.now() - room['healthchecked_at'].replace(tzinfo=None)).seconds < ALIVE_INTERVAL
+        alive = bool(room.get('healthchecked_at')) and (datetime.now() - room['healthchecked_at'].replace(tzinfo=None)).seconds < ALIVE_INTERVAL
 
         events = room.get('events', [])
         if len(events) > 2:
