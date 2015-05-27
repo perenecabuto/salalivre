@@ -36,10 +36,7 @@ def rooms():
     response = []
     for room in rooms:
         empty = False
-        alive = False
-
-        if room['heathchecked_at']:
-            pass
+        alive = room['heathchecked_at'] is not None and (datetime.now() - room['heathchecked_at'].replace(tzinfo=None)).seconds < ALIVE_INTERVAL
 
         response.append({
             'name': room['_id'],
@@ -68,13 +65,14 @@ def register_event(name):
     return "",  201
 
 
-@app.route("/heathcheck/<name>")
+@app.route("/healthcheck/<name>")
 def heathcheck(name):
     room = mongo.db.rooms.find_one({'_id': name})
     if room is None:
         return "", 404
 
     room = mongo.db.rooms.find_and_modify({'_id': name}, {'heathchecked_at': datetime.now()})
+    return "", 201
 
 
 if __name__ == "__main__":
