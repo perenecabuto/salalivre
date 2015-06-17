@@ -72,8 +72,11 @@ def register_event(name):
 
     events = room.get('events', [])
     events.append(datetime.now())
-    room = mongo.db.rooms.find_and_modify({'_id': name}, {'events': events[-MAX_EVENTS_PER_ROOM:]})
-    return "",  201
+    room = mongo.db.rooms.find_and_modify({'_id': name}, {
+        'events': events[-MAX_EVENTS_PER_ROOM:],
+        'healthchecked_at': datetime.now(),
+    })
+    return "", 201
 
 
 @app.route("/healthcheck/<name>")
