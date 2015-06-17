@@ -17,8 +17,8 @@
 
 # Create Room
 
-    curl -X POST http://0.0.0.0:5000/rooms --data '{"name": "1D"}' -H "Content-Type: application/json"
-    curl -X POST http://0.0.0.0:5000/rooms --data '{"name": "1E"}' -H "Content-Type: application/json"
+    curl -X POST http://0.0.0.0:5000/room --data '{"name": "1D"}' -H "Content-Type: application/json"
+    curl -X POST http://0.0.0.0:5000/room --data '{"name": "1E"}' -H "Content-Type: application/json"
 
 # Get Rooms
 

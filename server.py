@@ -1,4 +1,4 @@
-# coding: utf8
+# coding: utf-8
 
 from datetime import datetime
 
@@ -8,43 +8,32 @@ from flask.ext.pymongo import PyMongo
 app = Flask(__name__)
 mongo = PyMongo(app)
 
-EVENT_TIME_INTERVAL = 30  # seconds
-ALIVE_INTERVAL = 3 * 60 # seconds
+MAX_INTERVAL = 30  # seconds
+ALIVE_INTERVAL = 3 * 60  # seconds
 MAX_EVENTS_PER_ROOM = 10
+NUM_OF_LAST_EVENTS = 3
 
 
 @app.route("/")
 def index():
-    #mongo.db.rooms.remove()
     return render_template("index.html")
 
 
-@app.route("/rooms", methods=['GET', 'POST'])
+@app.route("/rooms", methods=['GET'])
 def rooms():
-    if request.method == 'POST':
-        if not request.json or 'name' not in request.json:
-            return 'You must send the room name: {"name": ...}', 400
-
-        name = request.json['name']
-        room = mongo.db.rooms.find_one({'_id': name})
-        if room:
-            return "Room %s already exists" % name, 409
-
-        mongo.db.rooms.insert({'_id': name, 'events': [], 'healthchecked_at': None})
-        return "", 201
-
     rooms = mongo.db.rooms.find() or []
     response = []
     for room in rooms:
-        in_use = False
-        alive = bool(room.get('healthchecked_at')) and (datetime.now() - room['healthchecked_at'].replace(tzinfo=None)).seconds < ALIVE_INTERVAL
+        alive = False
+        if room.get('healthchecked_at') is not None:
+            alive = (datetime.now() - room['healthchecked_at'].replace(tzinfo=None)).seconds < ALIVE_INTERVAL
 
+        in_use = False
         events = room.get('events', [])
-        if len(events) > 2:
-            current_interval = (datetime.now() - events[-1].replace(tzinfo=None)).seconds
-            first_interval = (events[-1] - events[-2]).seconds
-            last_interval = (events[-2] - events[-3]).seconds
-            in_use = current_interval <= EVENT_TIME_INTERVAL and first_interval <= EVENT_TIME_INTERVAL and last_interval <= EVENT_TIME_INTERVAL
+        if len(events) >= NUM_OF_LAST_EVENTS:
+            last_events = [e.replace(tzinfo=None) for e in events[-NUM_OF_LAST_EVENTS:]] + [datetime.now()]
+            intervals = (last_events[i] - last_events[i-1] for i in xrange(len(last_events) - 1, 0, -1))
+            in_use = all(i.seconds <= MAX_INTERVAL for i in intervals)
 
         response.append({
             'name': room['_id'],
@@ -53,6 +42,20 @@ def rooms():
         })
 
     return jsonify(rooms=list(response))
+
+
+@app.route("/room", methods=['POST'])
+def create_room():
+    if not request.json or 'name' not in request.json:
+        return 'You must send the room name: {"name": ...}', 400
+
+    name = request.json['name']
+    room = mongo.db.rooms.find_one({'_id': name})
+    if room:
+        return "Room %s already exists" % name, 409
+
+    mongo.db.rooms.insert({'_id': name, 'events': [], 'healthchecked_at': None})
+    return "", 201
 
 
 @app.route("/room/<name>", methods=['DELETE'])
