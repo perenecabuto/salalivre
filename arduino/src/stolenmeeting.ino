@@ -1,4 +1,8 @@
 // http://archive.wired.com/geekdad/2012/09/using-motion-detectors-with-an-arduino/
+// https://github.com/prampec/arduino-softtimer/blob/wiki/WhyHow.md
+// https://nurdspace.nl/ESP8266
+// http://contractorwolf.com/esp8266-wifi-arduino-micro
+// http://www.instructables.com/id/ESP8266-Wifi-Temperature-Logger/
 
 #include <AltSoftSerial.h>
 #include <SoftTimer.h>
@@ -30,7 +34,7 @@ void setup() {
     while(!connectWiFi()) {
       Serial.println("Retrying connect to network");
     }
-    
+
     digitalWrite(light, HIGH);
 
     SoftTimer.add(&blinkTask);
