@@ -2,6 +2,10 @@
 
 from datetime import datetime
 
+from gevent.wsgi import WSGIServer
+from gevent import monkey
+monkey.patch_all()
+
 from flask import Flask, render_template, request, jsonify
 from flask.ext.pymongo import PyMongo
 
@@ -91,5 +95,5 @@ def healthcheck(name):
 
 if __name__ == "__main__":
     app.debug = True
-    app.run("0.0.0.0", 5000)
+    WSGIServer(('0.0.0.0', 5000), app).serve_forever()
 
