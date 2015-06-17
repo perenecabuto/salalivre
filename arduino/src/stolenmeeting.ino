@@ -4,8 +4,8 @@
 #include <SoftTimer.h>
 
 String ID = "1D";
-String SSID = "______$$";
-String PASS = "luk4zush4r3";
+String SSID = "";
+String PASS = "";
 
 int SERVER_PORT = 5000;
 String SERVER_ADDRESS = "192.168.23.104";
