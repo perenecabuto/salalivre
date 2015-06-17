@@ -17,39 +17,43 @@ int light = 13;
 bool presenceDetected = false;
 
 AltSoftSerial wifi(8, 9); // RX, TX
-Task sendStatusTask(5000, sendStatus);
-Task sensorTask(500, updatepresenceDetected);
 
+Task wifiTask(30000, sendStatus);
+Task sensorTask(1200, detectPresence);
+Task blinkTask(500, pblink);
 
 void setup() {
     pinMode(sensor, INPUT);
     pinMode(light, OUTPUT);
 
-    Serial.begin(115200);
+    Serial.begin(9600);
     while(!connectWiFi()) {
       Serial.println("Retrying connect to network");
     }
     
     digitalWrite(light, HIGH);
 
+    SoftTimer.add(&blinkTask);
     SoftTimer.add(&sensorTask);
-    SoftTimer.add(&sendStatusTask);
+    SoftTimer.add(&wifiTask);
 }
 
-void updatepresenceDetected(Task* me) {
+boolean toggle = false;
+void pblink(Task* me) {
+    if (presenceDetected) {
+      toggle = !toggle;
+      digitalWrite(light, toggle ? LOW : HIGH);  
+      Serial.print("blink ");
+      Serial.println(toggle);
+    }
+}
+
+void detectPresence(Task* me) {
     if (!presenceDetected) {
       presenceDetected = digitalRead(sensor) == HIGH;
-    } 
-    
-    if (presenceDetected) {
-        digitalWrite(light, LOW);
-        delay(500);
-        digitalWrite(light, HIGH);
     }
-    
-    Serial.println(
-      presenceDetected ? "There is something here" : "No presence detected"
-    );
+
+    Serial.println(presenceDetected ? "There is something here" : "No presence detected");
 }
 
 void sendStatus(Task* me) {
@@ -82,13 +86,14 @@ void request(String host, int port, String action) {
     Serial.print("Requesting " + action + "... ");
     action = action + " HTTP/1.0\r\n\r\n";
     wifi.print("AT+CIPSEND=");
-    delay(500);
+    delay(100);
     wifi.println(action.length());
     delay(500);
     wifi.println(action);
     delay(1000);
     //wifi.println("AT+CIPCLOSE");
     Serial.println("ok");
+    wifi.flush();
 }
 
 boolean connectWiFi() {

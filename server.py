@@ -12,10 +12,10 @@ from flask.ext.pymongo import PyMongo
 app = Flask(__name__)
 mongo = PyMongo(app)
 
-MAX_EVENTS_INTERVAL = 30  # seconds
-ALIVE_INTERVAL = 3 * 60  # seconds
 MAX_EVENTS_PER_ROOM = 10
 NUM_OF_LAST_EVENTS = 3
+MAX_EVENTS_INTERVAL = 1 * 60  # seconds
+ALIVE_INTERVAL = 3 * 60  # seconds
 
 
 @app.route("/")
@@ -25,8 +25,8 @@ def index():
 
 @app.route("/rooms", methods=['GET'])
 def rooms():
-    rooms = mongo.db.rooms.find() or []
     response = []
+    rooms = mongo.db.rooms.find() or []
     for room in rooms:
         alive = False
         if room.get('healthchecked_at') is not None:
