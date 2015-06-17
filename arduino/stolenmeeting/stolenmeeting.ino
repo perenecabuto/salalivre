@@ -1,21 +1,24 @@
 // http://archive.wired.com/geekdad/2012/09/using-motion-detectors-with-an-arduino/
 
 #include <AltSoftSerial.h>
-
+#include <SoftTimer.h>
 
 String ID = "1D";
-String SSID = "";
-String PASS = "";
+String SSID = "______$$";
+String PASS = "luk4zush4r3";
 
 int SERVER_PORT = 5000;
 String SERVER_ADDRESS = "192.168.23.104";
 String healthcheckAction = "GET /healthcheck/" + ID;
 String eventAction = "POST /room/" + ID + "/event";
 
-AltSoftSerial wifi(8, 9); // RX, TX
-
 int sensor = 2;
 int light = 13;
+bool presenceDetected = false;
+
+AltSoftSerial wifi(8, 9); // RX, TX
+Task sendStatusTask(5000, sendStatus);
+Task sensorTask(500, updatepresenceDetected);
 
 
 void setup() {
@@ -28,15 +31,31 @@ void setup() {
     }
     
     digitalWrite(light, HIGH);
+
+    SoftTimer.add(&sensorTask);
+    SoftTimer.add(&sendStatusTask);
 }
 
-void loop() {
-    int sensorValue = digitalRead(sensor);
-    if (sensorValue == HIGH) {
-        registerEvent();
+void updatepresenceDetected(Task* me) {
+    if (!presenceDetected) {
+      presenceDetected = digitalRead(sensor) == HIGH;
+    } 
+    
+    if (presenceDetected) {
         digitalWrite(light, LOW);
         delay(500);
         digitalWrite(light, HIGH);
+    }
+    
+    Serial.println(
+      presenceDetected ? "There is something here" : "No presence detected"
+    );
+}
+
+void sendStatus(Task* me) {
+    if (presenceDetected) {
+        registerEvent();
+        presenceDetected = false;
     } else {
         healthcheck();
     }
@@ -50,6 +69,7 @@ void healthcheck() {
 void registerEvent() {
     request(SERVER_ADDRESS, SERVER_PORT, eventAction);
 }
+
 
 void request(String host, int port, String action) {
     wifi.println("AT+CIPSTART=\"TCP\",\"" + host + "\"," + port);
