@@ -8,7 +8,7 @@ from flask.ext.pymongo import PyMongo
 app = Flask(__name__)
 mongo = PyMongo(app)
 
-MAX_INTERVAL = 30  # seconds
+MAX_EVENTS_INTERVAL = 30  # seconds
 ALIVE_INTERVAL = 3 * 60  # seconds
 MAX_EVENTS_PER_ROOM = 10
 NUM_OF_LAST_EVENTS = 3
@@ -33,7 +33,7 @@ def rooms():
         if len(events) >= NUM_OF_LAST_EVENTS:
             last_events = [e.replace(tzinfo=None) for e in events[-NUM_OF_LAST_EVENTS:]] + [datetime.now()]
             intervals = (last_events[i] - last_events[i-1] for i in xrange(len(last_events) - 1, 0, -1))
-            in_use = all(i.seconds <= MAX_INTERVAL for i in intervals)
+            in_use = all(i.seconds <= MAX_EVENTS_INTERVAL for i in intervals)
 
         response.append({
             'name': room['_id'],
