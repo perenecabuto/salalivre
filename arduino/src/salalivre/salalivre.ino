@@ -11,8 +11,9 @@ String ID = "1D";
 String SSID = "";
 String PASS = "";
 
-int SERVER_PORT = 5000;
-String SERVER_ADDRESS = "192.168.23.104";
+int SERVER_PORT = 80;
+String SERVER_ADDRESS = "10.70.3.81";
+String SERVER_HOSTNAME = "salalivre.cloud.globoi.com";
 String healthcheckAction = "GET /healthcheck/" + ID;
 String eventAction = "POST /room/" + ID + "/event";
 
@@ -25,6 +26,7 @@ AltSoftSerial wifi(8, 9); // RX, TX
 Task wifiTask(30000, sendStatus);
 Task sensorTask(1200, detectPresence);
 Task blinkTask(500, pblink);
+
 
 void setup() {
     pinMode(sensor, INPUT);
@@ -71,15 +73,20 @@ void sendStatus(Task* me) {
 
 
 void healthcheck() {
-    request(SERVER_ADDRESS, SERVER_PORT, healthcheckAction);
+    request(SERVER_ADDRESS, SERVER_PORT, healthcheckAction, SERVER_HOSTNAME);
 }
 
 void registerEvent() {
-    request(SERVER_ADDRESS, SERVER_PORT, eventAction);
+    request(SERVER_ADDRESS, SERVER_PORT, eventAction, SERVER_HOSTNAME);
 }
 
 
-void request(String host, int port, String action) {
+void request(String host, int port, String action, String hostName) {
+
+    if (!hostName) {
+      hostName = host;
+    }
+
     wifi.println("AT+CIPSTART=\"TCP\",\"" + host + "\"," + port);
     delay(2000);
     if (wifi.find("Error")) {
@@ -88,7 +95,7 @@ void request(String host, int port, String action) {
     }
  
     Serial.print("Requesting " + action + "... ");
-    action = action + " HTTP/1.0\r\n\r\n";
+    action = action + " HTTP/1.0\r\nHost: " + hostName + "\r\n\r\n";
     wifi.print("AT+CIPSEND=");
     delay(100);
     wifi.println(action.length());
@@ -97,24 +104,30 @@ void request(String host, int port, String action) {
     delay(1000);
     wifi.println("AT+CIPCLOSE");
     Serial.println("ok");
+
     wifi.flush();
 }
 
-boolean connectWiFi() {
+boolean connectWiFi() {    
     Serial.print("Connecting... ");
     wifi.begin(9600);
 
     wifi.println("AT");
-    delay(500);
     if (!wifi.find("OK")) {
         Serial.println("error connecting module");
         return false;
+    }
+    
+    wifi.println("AT+CIPSTATUS");
+    if (wifi.find("STATUS:3") || wifi.find("STATUS:5")) {
+        Serial.println("already connected");
+        return true;
     }
 
     wifi.println("AT+RST");
     wifi.println("AT+CWMODE=1");
     delay(1000); //delay after mode change
-    wifi.println("AT+CWJAP_CUR=\"" + SSID + "\",\"" + PASS + "\"");
+    wifi.println("AT+CWJAP=\"" + SSID + "\",\"" + PASS + "\"");
     delay(1000);
     if (!wifi.find("OK")) {
         Serial.println("error connecting AP");
