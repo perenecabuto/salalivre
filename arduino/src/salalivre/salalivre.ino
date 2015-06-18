@@ -30,7 +30,7 @@ void setup() {
     pinMode(sensor, INPUT);
     pinMode(light, OUTPUT);
 
-    Serial.begin(9600);
+    Serial.begin(115200);
     while(!connectWiFi()) {
       Serial.println("Retrying connect to network");
     }
@@ -101,11 +101,11 @@ void request(String host, int port, String action) {
 }
 
 boolean connectWiFi() {
+    Serial.print("Connecting... ");
     wifi.begin(9600);
 
-    Serial.print("Connecting... ");
-
     wifi.println("AT");
+    delay(500);
     if (!wifi.find("OK")) {
         Serial.println("error connecting module");
         return false;
@@ -113,9 +113,10 @@ boolean connectWiFi() {
 
     wifi.println("AT+RST");
     wifi.println("AT+CWMODE=1");
-    delay(500); //delay after mode change
+    delay(1000); //delay after mode change
     wifi.println("AT+CWJAP_CUR=\"" + SSID + "\",\"" + PASS + "\"");
-    if (wifi.find("OK")) {
+    delay(1000);
+    if (!wifi.find("OK")) {
         Serial.println("error connecting AP");
         return false;
     }
