@@ -34,7 +34,7 @@ void setup() {
 
     Serial.begin(115200);
     while(!connectWiFi()) {
-      Serial.println("Retrying connect to network");
+        Serial.println("Retrying connect to network");
     }
 
     digitalWrite(light, HIGH);
@@ -47,16 +47,16 @@ void setup() {
 boolean toggle = false;
 void pblink(Task* me) {
     if (presenceDetected) {
-      toggle = !toggle;
-      digitalWrite(light, toggle ? LOW : HIGH);  
-      Serial.print("blink ");
-      Serial.println(toggle);
+        toggle = !toggle;
+        digitalWrite(light, toggle ? LOW : HIGH);
+        Serial.print("blink ");
+        Serial.println(toggle);
     }
 }
 
 void detectPresence(Task* me) {
     if (!presenceDetected) {
-      presenceDetected = digitalRead(sensor) == HIGH;
+        presenceDetected = digitalRead(sensor) == HIGH;
     }
 
     Serial.println(presenceDetected ? "There is something here" : "No presence detected");
@@ -84,7 +84,7 @@ void registerEvent() {
 void request(String host, int port, String action, String hostName) {
 
     if (!hostName) {
-      hostName = host;
+        hostName = host;
     }
 
     wifi.println("AT+CIPSTART=\"TCP\",\"" + host + "\"," + port);
@@ -93,7 +93,7 @@ void request(String host, int port, String action, String hostName) {
         Serial.println("Connection error");
         return;
     }
- 
+
     Serial.print("Requesting " + action + "... ");
     action = action + " HTTP/1.0\r\nHost: " + hostName + "\r\n\r\n";
     wifi.print("AT+CIPSEND=");
@@ -102,13 +102,13 @@ void request(String host, int port, String action, String hostName) {
     delay(500);
     wifi.println(action);
     delay(1000);
-    wifi.println("AT+CIPCLOSE");
+    //wifi.println("AT+CIPCLOSE");
     Serial.println("ok");
 
     wifi.flush();
 }
 
-boolean connectWiFi() {    
+boolean connectWiFi() {
     Serial.print("Connecting... ");
     wifi.begin(9600);
 
@@ -117,7 +117,7 @@ boolean connectWiFi() {
         Serial.println("error connecting module");
         return false;
     }
-    
+
     wifi.println("AT+CIPSTATUS");
     if (wifi.find("STATUS:3") || wifi.find("STATUS:5")) {
         Serial.println("already connected");
