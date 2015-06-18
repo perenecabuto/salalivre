@@ -11,7 +11,7 @@ from flask import Flask, render_template, request, jsonify
 from flask.ext.pymongo import PyMongo
 
 app = Flask(__name__)
-app.config["MONGO_URI"] = os.environ.get('MONGO_URI', 'mongodb://localhost:27017/salalivre')
+app.config["MONGO_URI"] = os.environ.get('DBAAS_MONGODB_ENDPOINT', 'mongodb://localhost:27017/salalivre')
 mongo = PyMongo(app)
 
 MAX_EVENTS_PER_ROOM = 10
