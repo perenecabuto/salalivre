@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from datetime import datetime
+import os
 
 from gevent.wsgi import WSGIServer
 from gevent import monkey
@@ -10,13 +11,13 @@ from flask import Flask, render_template, request, jsonify
 from flask.ext.pymongo import PyMongo
 
 app = Flask(__name__)
+app.config["MONGO_URI"] = os.environ.get('MONGO_URI', 'mongodb://localhost:27017/salalivre')
 mongo = PyMongo(app)
 
 MAX_EVENTS_PER_ROOM = 10
 NUM_OF_LAST_EVENTS = 3
 MAX_EVENTS_INTERVAL = 1 * 60  # seconds
 ALIVE_INTERVAL = 3 * 60  # seconds
-
 
 @app.route("/")
 def index():
