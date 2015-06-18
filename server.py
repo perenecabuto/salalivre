@@ -95,6 +95,8 @@ def healthcheck(name):
 
 
 if __name__ == "__main__":
+    port = int(os.environ.get('PORT', 5000))
+    print "Starting server at port %s" % port
     app.debug = True
-    WSGIServer(('0.0.0.0', 5000), app).serve_forever()
+    WSGIServer(('0.0.0.0', port), app).serve_forever()
 
