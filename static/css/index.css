@@ -1,0 +1,29 @@
+.salalivre-title {
+	text-align: center;
+}
+.container {
+	margin: 0 10%;
+	position: absolute;
+	width: 80%;
+}
+.box-container{
+	border-radius: 5px;
+	height: 200px;
+	position: relative;
+	vertical-align: middle;
+}
+.title-text {
+	color: white;
+	text-align: center;
+}
+.offline {
+	background-color: #e5e5e5; 
+}
+.in-use{
+	background-color: #fa5555;
+
+}
+.empty{
+	background-color: #37ca8d;
+
+}
