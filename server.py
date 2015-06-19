@@ -27,7 +27,7 @@ def index():
 @app.route("/rooms", methods=['GET'])
 def rooms():
     response = []
-    rooms = mongo.db.rooms.find() or []
+    rooms = mongo.db.rooms.find(sort=[('position', 1)]) or []
     for room in rooms:
         alive = False
         if room.get('healthchecked_at') is not None:
@@ -44,6 +44,7 @@ def rooms():
             'name': room['_id'],
             'in_use': in_use,
             'alive': alive,
+            'position': room['position']
         })
 
     return jsonify(rooms=list(response))
@@ -55,11 +56,20 @@ def create_room():
         return 'You must send the room name: {"name": ...}', 400
 
     name = request.json['name']
+
     room = mongo.db.rooms.find_one({'_id': name})
     if room:
         return "Room %s already exists" % name, 409
 
-    mongo.db.rooms.insert({'_id': name, 'events': [], 'healthchecked_at': None})
+    if 'position' in request.json:
+        position = request.json.get('position')
+    else:
+        last_room = mongo.db.rooms.find_one(sort=[('position', -1)])
+        position = last_room['position'] if last_room else 0
+
+    position = position + 1
+
+    mongo.db.rooms.insert({'_id': name, 'events': [], 'position': position, 'healthchecked_at': None})
     return "", 201
 
 
