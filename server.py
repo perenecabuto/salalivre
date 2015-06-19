@@ -28,7 +28,7 @@ def index():
 def rooms():
     response = []
     rooms = mongo.db.rooms.find(sort=[('position', 1)]) or []
-    for room in rooms:
+    for i, room in enumerate(rooms):
         alive = False
         if room.get('healthchecked_at') is not None:
             alive = (datetime.now() - room['healthchecked_at'].replace(tzinfo=None)).seconds < ALIVE_INTERVAL
@@ -44,7 +44,7 @@ def rooms():
             'name': room['_id'],
             'in_use': in_use,
             'alive': alive,
-            'position': room['position']
+            'position': room.get('position', i)
         })
 
     return jsonify(rooms=list(response))
@@ -61,9 +61,8 @@ def create_room():
     if room:
         return "Room %s already exists" % name, 409
 
-    if 'position' in request.json:
-        position = request.json.get('position')
-    else:
+    position = request.json.get('position')
+    if not position:
         last_room = mongo.db.rooms.find_one(sort=[('position', -1)])
         position = last_room['position'] if last_room else 0
 
