@@ -11,9 +11,10 @@
 .title-text {
     color: white;
     text-align: center;
+    font-size: 8vw;
 }
 .offline .title-text {
-    color: #c3c3c3; 
+    color: #c3c3c3;
 }
 .vcenter {
     display: inline-block;
@@ -31,3 +32,9 @@
 .empty{
     background-color: #37ca8d;
 }
+
+@media (min-width: @screen-sm) {
+    .title-text {
+    }
+}
+
