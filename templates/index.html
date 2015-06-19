@@ -37,7 +37,7 @@
                                 $container.append($roomEl);
                             }
 
-                            var status = room.alive ? 'alive' : (room.in_use ? 'in-use' : 'empty');
+                            var status = !room.alive ? 'offline' : (room.in_use ? 'in-use' : 'empty');
                             $roomEl.text(room.name + " Status: " + status);
                         }
                     });
