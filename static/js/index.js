@@ -1,5 +1,4 @@
 $(document).ready(function() {
-    // use strict;
     var $container = $('.rooms-container');
 
     function getRooms() {
@@ -19,11 +18,8 @@ $(document).ready(function() {
                 }
 
                 var status = !room.alive ? 'offline' : (room.in_use ? 'in-use' : 'empty');
-
                 $roomEl.find('.box-container').removeClass('offline').removeClass('in-use').removeClass('empty');
-
                 $roomEl.find('.box-container').addClass(status);
-
             }
         });
     }
