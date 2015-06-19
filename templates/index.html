@@ -4,7 +4,13 @@
     	<title>Sala Livre</title>
     	<link rel="stylesheet" type="text/css" href="static/bootstrap-3.3.5-dist/css/bootstrap.min.css">
     	<link rel="stylesheet" type="text/css" href="static/bootstrap-3.3.5-dist/css/bootstrap-theme.min.css">
+    	<link rel="stylesheet" type="text/css" href="static/fonts/open-sans.css">
     	<link rel="stylesheet" type="text/css" href="static/css/index.css">
+    	<style>
+            body {
+                font-family: 'Open Sans';
+            }
+        </style>
     </head>
     <body>
     	<header class="container-title">
@@ -21,5 +27,39 @@
 				</div>
 				</div>
     	</section>
+
+    	<script src="static/js/jquery-2.1.4.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                var $container = $('.rooms-container');
+
+                function getRooms() {
+                    $.getJSON('/rooms', function(data) {
+                        var rooms = data.rooms || [];
+                        for (var i = 0; i < rooms.length; i++) {
+                            var room = rooms[i];
+                            var roomId = room.name;
+                            var $roomEl = $('#' + roomId);
+
+                            if ($roomEl.get(0) === undefined) {
+                                $roomEl = $('<div />');
+                                $roomEl.attr('id', roomId);
+                                $container.append($roomEl);
+                            }
+
+                            var status = !room.alive ? 'offline' : (room.in_use ? 'in-use' : 'empty');
+                            $roomEl.text(room.name + " Status: " + status);
+                        }
+                    });
+                }
+
+                function autoUpdateRooms() {
+                    getRooms();
+                    setTimeout(autoUpdateRooms, 1000);
+                };
+
+                autoUpdateRooms();
+            });
+        </script>
     </body>
 </html>
