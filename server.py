@@ -86,9 +86,11 @@ def register_event(name):
 
     events = room.get('events', [])
     events.append(datetime.now())
-    room = mongo.db.rooms.find_and_modify({'_id': name}, {
-        'events': events[-MAX_EVENTS_PER_ROOM:],
-        'healthchecked_at': datetime.now(),
+    room = mongo.db.rooms.update({'_id': name}, {
+        '$set': {
+            'events': events[-MAX_EVENTS_PER_ROOM:],
+            'healthchecked_at': datetime.now(),
+        }
     })
     return "", 201
 
@@ -99,7 +101,7 @@ def healthcheck(name):
     if room is None:
         return "", 404
 
-    room = mongo.db.rooms.find_and_modify({'_id': name}, {'healthchecked_at': datetime.now()})
+    room = mongo.db.rooms.update({'_id': name}, {'$set': {'healthchecked_at': datetime.now()}}, upset=False)
     return "", 201
 
 
