@@ -19,14 +19,15 @@
     		</h1>
     	</header>
     	<section class="container rooms-container">
-			<div class="col-sm-8 col-md-4 ">
+    	</section>
+    	<script type="js/template" id="template">
+    		<div class="col-sm-8 col-md-4">
 				<div class="thumbnail tile box-container">
 					<h1 class="title-text">
-						1A
 					</h1>
 				</div>
-				</div>
-    	</section>
+			</div>
+    	</script>
 
     	<script src="static/js/jquery-2.1.4.min.js"></script>
         <script>
@@ -42,13 +43,19 @@
                             var $roomEl = $('#' + roomId);
 
                             if ($roomEl.get(0) === undefined) {
-                                $roomEl = $('<div />');
+                                var template = $('#template').text();
+                                $roomEl = $(template);
                                 $roomEl.attr('id', roomId);
+                                $roomEl.find('.title-text').text(room.name);
                                 $container.append($roomEl);
                             }
 
                             var status = !room.alive ? 'offline' : (room.in_use ? 'in-use' : 'empty');
-                            $roomEl.text(room.name + " Status: " + status);
+
+                            $roomEl.find('.box-container').removeClass('offline').removeClass('in-use').removeClass('empty');
+
+                            $roomEl.find('.box-container').addClass(status);
+
                         }
                     });
                 }
