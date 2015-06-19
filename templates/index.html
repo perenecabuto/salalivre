@@ -44,7 +44,8 @@
                 }
 
                 function autoUpdateRooms() {
-                    setTimeout(getRooms, 500);
+                    getRooms();
+                    setTimeout(autoUpdateRooms, 1000);
                 };
 
                 autoUpdateRooms();
